@@ -1,0 +1,67 @@
+# Dockerfile.airflow
+FROM apache/airflow:2.10.2-python3.12
+
+USER root
+
+# Install OpenJDK 17 for Spark (Debian Bookworm default)
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    openjdk-17-jdk \
+    procps \
+    curl \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# Set JAVA_HOME for Java 17
+ENV JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+ENV PATH="${JAVA_HOME}/bin:${PATH}"
+
+# Download Spark
+ENV SPARK_VERSION=3.5.0
+ENV HADOOP_VERSION=3
+ENV SPARK_HOME=/opt/spark
+
+RUN curl -O https://archive.apache.org/dist/spark/spark-${SPARK_VERSION}/spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION}.tgz && \
+    tar -xzf spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION}.tgz && \
+    mv spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION} ${SPARK_HOME} && \
+    rm spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION}.tgz
+
+# Download additional JARs for Spark
+WORKDIR ${SPARK_HOME}/jars
+
+RUN curl -O https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-aws/3.3.4/hadoop-aws-3.3.4.jar && \
+    curl -O https://repo1.maven.org/maven2/com/amazonaws/aws-java-sdk-bundle/1.12.262/aws-java-sdk-bundle-1.12.262.jar && \
+    curl -O https://repo1.maven.org/maven2/org/apache/iceberg/iceberg-spark-runtime-3.4_2.12/1.5.2/iceberg-spark-runtime-3.4_2.12-1.5.2.jar && \
+    curl -O https://repo1.maven.org/maven2/software/amazon/awssdk/bundle/2.20.18/bundle-2.20.18.jar && \
+    curl -O https://repo1.maven.org/maven2/software/amazon/awssdk/url-connection-client/2.20.18/url-connection-client-2.20.18.jar && \
+    curl -O https://repo1.maven.org/maven2/org/apache/iceberg/iceberg-aws/1.4.3/iceberg-aws-1.4.3.jar && \
+    curl -O https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-common/3.3.4/hadoop-common-3.3.4.jar && \
+    curl -O https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-auth/3.3.4/hadoop-auth-3.3.4.jar
+
+ENV PATH="${SPARK_HOME}/bin:${PATH}"
+ENV PYTHONPATH="${SPARK_HOME}/python:${SPARK_HOME}/python/lib/py4j-0.10.9.7-src.zip:${PYTHONPATH}"
+
+# Switch back to airflow user
+USER airflow
+
+# Copy requirements file
+COPY requirements.txt /tmp/requirements.txt
+RUN pip install --upgrade pip
+# Install Python packages
+RUN pip install --no-cache-dir -r /tmp/requirements.txt
+
+# Create directories for DAGs and Spark jobs
+USER root
+RUN mkdir -p /opt/airflow/dags \
+    /opt/airflow/logs \
+    /opt/airflow/plugins \
+    /opt/airflow/spark_jobs \
+    /opt/airflow/config \
+    /opt/airflow/scripts \
+    /opt/airflow/gx && \
+    chown -R airflow:root /opt/airflow
+
+USER airflow
+
+# Set working directory
+WORKDIR /opt/airflow

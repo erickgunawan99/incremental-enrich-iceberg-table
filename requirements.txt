@@ -1,0 +1,31 @@
+# requirements.txt
+
+# Airflow providers
+apache-airflow-providers-apache-spark==4.7.1
+apache-airflow-providers-amazon==8.18.0
+apache-airflow==2.10.2
+
+
+# Asyncio for concurrent archiving
+asyncio==3.4.2
+
+# Spark and data processing
+pyspark==3.5.0
+pyarrow==14.0.1
+pandas==2.1.4
+
+# Great Expectations
+great-expectations==0.18.19
+sqlalchemy==1.4.51  # GX compatibility
+
+# MinIO/S3
+boto3==1.34.34
+minio==7.2.3
+
+# Data generation (for testing)
+faker==22.0.0
+
+# Utilities
+python-dotenv==1.0.0
+pyyaml==6.0.1
+requests==2.31.0
