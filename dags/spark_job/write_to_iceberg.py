@@ -13,7 +13,7 @@ def create_spark_session():
              .config("spark.sql.ui.explainMode", "extended") \
              .config("spark.sql.adaptive.enabled", "true") \
              .config("spark.sql.adaptive.logLevel", "info") \
-             .config("spark.shuffle.partitions", "4") 
+             .config("spark.shuffle.partitions", "24") 
         spark = builder.getOrCreate()
 
         spark.sparkContext.setLogLevel("WARN")
