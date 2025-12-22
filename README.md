@@ -2,44 +2,42 @@
 1. Pre-Orchestration Setup (Bootstrap Phase)
   Before the Airflow DAG takes over, the environment is initialized to establish the Lakehouse schema and reference data.
 
-  * Key Setup Steps:
+    * Key Setup Steps:
 
-  1. Infrastructure: Spinning up the stack via Docker Compose (Spark, Airflow, MinIO).
+    1. Infrastructure: Spinning up the stack via Docker Compose (Spark, Airflow, MinIO).
 
-  1. Data Generation: Seeding the raw bucket in MinIO with initial transaction data.
+    1. Data Generation: Seeding the raw bucket in MinIO with initial transaction data.
 
-  1. Schema Initialization: Running a one-time Spark script to:
+    1. Schema Initialization: Running a one-time Spark script to:
 
-  1. Create the raw Iceberg table.
+    1. Create the raw Iceberg table.
 
-  1. Ingest country_demographics.csv into a permanent dimension Iceberg table.
+    1. Ingest country_demographics.csv into a permanent dimension Iceberg table.
 
-  1. Initialize the enriched output table where the final joined results will reside.
+    1. Initialize the enriched output table where the final joined results will reside.
 
 2. Airflow Orchestration Workflow
-  The DAG manages the incremental lifecycle of data, from ingestion to archiving, with a strict "Quality-First" gate.
+   * The DAG manages the incremental lifecycle of data, from ingestion to archiving, with a strict "Quality-First" gate.
 
-  -> merge_incremental_iceberg -> archive]
+   * Operational Flow:
 
-  Operational Flow:
+    1. Manifest Creation: Identifies a specific batch of new files (e.g., max 5 files) to process, ensuring predictable resource usage.
 
-  1. Manifest Creation: Identifies a specific batch of new files (e.g., max 5 files) to process, ensuring predictable resource usage.
+    1. Data Quality Gate (Great Expectations): Validates the batch against critical business rules:
 
-  1. Data Quality Gate (Great Expectations): Validates the batch against critical business rules:
+      1. Date Formats: Ensures consistency across time columns.
 
-    1. Date Formats: Ensures consistency across time columns.
+      1. Range Validation: Validates that years fall within logical bounds.
 
-    1. Range Validation: Validates that years fall within logical bounds.
+      1. Value Constraints: Checks min/max values for numeric fields to prevent data skew or corruption.
 
-    1. Value Constraints: Checks min/max values for numeric fields to prevent data skew or corruption.
+    1. Branching Logic:
 
-  1. Branching Logic:
+    1. Success Path: If data passes the threshold, spark_job writes to the raw Iceberg table, and merge_incremental_iceberg performs an Upsert/Merge into the final enriched         table.
 
-  1. Success Path: If data passes the threshold, spark_job writes to the raw Iceberg table, and merge_incremental_iceberg performs an Upsert/Merge into the final enriched table.
+    1. Quarantine Path: If validation fails, data is moved to a quarantine zone for manual inspection, bypassing the Iceberg warehouse.
 
-  1. Quarantine Path: If validation fails, data is moved to a quarantine zone for manual inspection, bypassing the Iceberg warehouse.
-
-  1. Cleanup & Archiving: Successfully processed files are moved to an archive folder, and the manifest is deleted to prepare for the next hourly run.
+    1. Cleanup & Archiving: Successfully processed files are moved to an archive folder, and the manifest is deleted to prepare for the next hourly run.
 
 3. Technical Configuration Highlights
   The pipeline utilizes a Hadoop-style Iceberg Catalog stored in MinIO. The Spark configuration is optimized for stability and observability:
