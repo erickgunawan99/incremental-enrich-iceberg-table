@@ -1,8 +1,6 @@
 **This project demonstrates a production-grade Data Lakehouse architecture using Apache Iceberg, Apache Spark, and Airflow. It features automated data quality enforcement with Great Expectations (GX) and an incremental enrichment pattern.**
-1. Pre-Orchestration Setup (Bootstrap Phase)
-  Before the Airflow DAG takes over, the environment is initialized to establish the Lakehouse schema and reference data.
-
-    * Key Setup Steps:
+1. Pre-Orchestration Setup (Bootstrap Phase): Before the Airflow DAG takes over, the environment is initialized to establish the Lakehouse schema and reference data.
+  Key Setup Steps:
 
     1. Infrastructure: Spinning up the stack via Docker Compose (Spark, Airflow, MinIO).
 
@@ -16,8 +14,7 @@
 
     1. Initialize the enriched output table where the final joined results will reside.
 
-2. Airflow Orchestration Workflow
-   * The DAG manages the incremental lifecycle of data, from ingestion to archiving, with a strict "Quality-First" gate.
+2. Airflow Orchestration Workflow: The DAG manages the incremental lifecycle of data, from ingestion to archiving, with a strict "Quality-First" gate.
 
    * Operational Flow:
 
@@ -25,11 +22,11 @@
 
     1. Data Quality Gate (Great Expectations): Validates the batch against critical business rules:
 
-      1. Date Formats: Ensures consistency across time columns.
+      - Date Formats: Ensures consistency across time columns.
 
-      1. Range Validation: Validates that years fall within logical bounds.
+      - Range Validation: Validates that years fall within logical bounds.
 
-      1. Value Constraints: Checks min/max values for numeric fields to prevent data skew or corruption.
+      - Value Constraints: Checks min/max values for numeric fields to prevent data skew or corruption.
 
     1. Branching Logic:
 
@@ -39,8 +36,7 @@
 
     1. Cleanup & Archiving: Successfully processed files are moved to an archive folder, and the manifest is deleted to prepare for the next hourly run.
 
-3. Technical Configuration Highlights
-  The pipeline utilizes a Hadoop-style Iceberg Catalog stored in MinIO. The Spark configuration is optimized for stability and observability:
+3. Technical Configuration Highlights: The pipeline utilizes a Hadoop-style Iceberg Catalog stored in MinIO. The Spark configuration is optimized for stability and observability:
 
   1. Iceberg Catalog: Configured via spark.sql.catalog.my_catalog using the hadoop type.
 
