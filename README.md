@@ -34,7 +34,6 @@
     1. Quarantine Path: If validation fails, data is moved to a quarantine zone for manual inspection, bypassing the Iceberg warehouse.
 
     1. Cleanup & Archiving: Successfully processed files are moved to an archive folder, and the manifest is deleted to prepare for the next hourly run.
-
 3. Technical Configuration Highlights: The pipeline utilizes a Hadoop-style Iceberg Catalog stored in MinIO. The Spark configuration is optimized for stability and           observability:
 
     1. Iceberg Catalog: Configured via spark.sql.catalog.my_catalog using the hadoop type.
