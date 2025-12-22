@@ -37,10 +37,10 @@
 
 3. Technical Configuration Highlights: The pipeline utilizes a Hadoop-style Iceberg Catalog stored in MinIO. The Spark configuration is optimized for stability and           observability:
 
-  1. Iceberg Catalog: Configured via spark.sql.catalog.my_catalog using the hadoop type.
+    1. Iceberg Catalog: Configured via spark.sql.catalog.my_catalog using the hadoop type.
 
-  1. S3A Integration: Custom S3A settings (endpoint, access keys, and path-style access) allow Spark to treat MinIO as an S3-compatible backend.
+    1. S3A Integration: Custom S3A settings (endpoint, access keys, and path-style access) allow Spark to treat MinIO as an S3-compatible backend.
 
-  1. Monitoring: Event logging is enabled to allow the Spark History Server to visualize job performance and query execution plans.
+    1. Monitoring: Event logging is enabled to allow the Spark History Server to visualize job performance and query execution plans.
 
-  1. Fault Tolerance: Uses specific Airflow trigger_rules (e.g., none_failed_min_one_success) to ensure the DAG converges correctly regardless of whether data was processed     or quarantined.
+    1. Fault Tolerance: Uses specific Airflow trigger_rules (e.g., none_failed_min_one_success) to ensure the DAG converges correctly regardless of whether data was processed     or quarantined.
