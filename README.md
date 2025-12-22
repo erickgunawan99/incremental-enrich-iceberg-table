@@ -1,6 +1,6 @@
 **This project demonstrates a production-grade Data Lakehouse architecture using Apache Iceberg, Apache Spark, and Airflow. It features automated data quality enforcement with Great Expectations (GX) and an incremental enrichment pattern.**
 
-*Pre-Orchestration Setup (Bootstrap Phase)
+* Pre-Orchestration Setup (Bootstrap Phase)
   Before the Airflow DAG takes over, the environment is initialized to establish the Lakehouse schema and reference data.
 
   Key Setup Steps:
@@ -17,7 +17,7 @@
 
   1. Initialize the enriched output table where the final joined results will reside.
 
-*Airflow Orchestration Workflow
+* Airflow Orchestration Workflow
   The DAG manages the incremental lifecycle of data, from ingestion to archiving, with a strict "Quality-First" gate.
 
   -> merge_incremental_iceberg -> archive]
